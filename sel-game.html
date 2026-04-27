@@ -283,7 +283,7 @@
   </div>
   <div class="card fade-up" style="animation-delay:.15s">
     <h2 style="text-align:center; margin-bottom:6px;">👋 歡迎！</h2>
-    <p style="color:var(--gray); font-size:.9rem; text-align:center; margin-bottom:22px;">請填寫資訊，開始探索辰光 SEL 三年施作歷程</p>
+    <p style="color:var(--gray); font-size:.9rem; text-align:center; margin-bottom:22px;">請填寫資訊，開始探索辰光 SEL 四年施作歷程</p>
     <label style="font-size:.88rem; color:var(--gray);">您的姓名</label>
     <input class="inp" id="inp-name" placeholder="請輸入您的姓名…" autocomplete="off">
     <label style="font-size:.88rem; color:var(--gray); margin-top:14px; display:block;">服務學校（選填）</label>
@@ -310,7 +310,7 @@
     <div class="lv-card teal" onclick="startLevel(1)">
       <div class="lv-icon">🗓️</div>
       <h3 style="font-size:1.1rem; margin-bottom:4px;">關卡一</h3>
-      <h4 style="color:var(--teal-light); margin-bottom:8px;">三年施作計劃</h4>
+      <h4 style="color:var(--teal-light); margin-bottom:8px;">四年施作計畫</h4>
       <p style="font-size:.85rem; color:var(--gray);">113–116 學年度<br>A 奠基 · B 實踐 · C 永續</p>
       <span class="lv-tag" style="background:rgba(26,138,138,.28); color:var(--teal-light);">7 題 + 配對</span>
       <div id="lv1-status" style="margin-top:10px; font-size:.85rem;"></div>
@@ -447,15 +447,15 @@ const Q1 = [
     q: '辰光國小 SEL 四年計畫分為哪三個施作階段？',
     opts: ['A 起步、B 推動、C 深化', 'A 奠基、B 實踐、C 永續', 'A 準備、B 施作、C 擴展', 'A 探索、B 執行、C 評估'],
     ans: 1,
-    exp: '辰光 SEL 三年計劃分為：A 奠基（113學年度）、B 實踐（114–115學年度）、C 永續（116學年度）三大階段。',
-    photo: 'slide-03.jpg', tag: '三年計劃總覽'
+    exp: '辰光 SEL 四年計畫分為：A 奠基（113學年度）、B 實踐（114–115學年度）、C 永續（116學年度）三大階段。',
+    photo: 'slide-03.jpg', tag: '四年計畫總覽'
   },
   {
     q: '「A 奠基」階段在哪個學年度實施？',
     opts: ['112 學年度', '114 學年度', '113 學年度', '115 學年度'],
     ans: 2,
     exp: 'A 奠基階段在 113 學年度，主要進行硬體建置與班級、校園環境佈置，打好 SEL 推動的基礎。',
-    photo: 'slide-03.jpg', tag: '三年計劃總覽'
+    photo: 'slide-03.jpg', tag: '四年計畫總覽'
   },
   {
     q: '以下哪一項屬於「A 奠基」階段的工作？',
@@ -469,7 +469,7 @@ const Q1 = [
     opts: ['113–114 學年度', '115–116 學年度', '112–113 學年度', '114–115 學年度'],
     ans: 3,
     exp: 'B 實踐階段跨越 114–115 學年度，是全校系統性落實 SEL 的核心階段，包含週四圍圈、夕會圍圈等機制。',
-    photo: 'slide-03.jpg', tag: '三年計劃總覽'
+    photo: 'slide-03.jpg', tag: '四年計畫總覽'
   },
   {
     q: '科任教師的「CHECK-IN / CHECK-OUT」屬於哪個施作階段？',
@@ -483,7 +483,7 @@ const Q1 = [
     opts: ['師、生、校', '班級、校園、社區', '導師、科任、行政', '師、親、生'],
     ans: 3,
     exp: 'C 永續階段以師（典範課程）、親（SEL活動參與）、生（生活經驗體現）三面向全面推展，讓 SEL 成為校園文化。',
-    photo: 'slide-03.jpg', tag: '三年計劃總覽'
+    photo: 'slide-03.jpg', tag: '四年計畫總覽'
   },
   {
     q: '「A 奠基」階段導入了哪些 SEL 工具（選最完整的答案）？',
@@ -495,12 +495,12 @@ const Q1 = [
 ];
 
 const MATCH_ITEMS = [
-  { text: '硬體建置',               ans: 'A', hint: '奠基階段先完善校園 SEL 環境的硬體條件。',          photo: 'slide-03.jpg', tag: '三年計劃總覽' },
+  { text: '硬體建置',               ans: 'A', hint: '奠基階段先完善校園 SEL 環境的硬體條件。',          photo: 'slide-03.jpg', tag: '四年計畫總覽' },
   { text: '全校性圍圈（週四）',     ans: 'B', hint: '週四全校圍圈是 B 實踐階段的核心機制。',            photo: 'photo-circle.jpg', tag: '週四圍圈・圖書館現場' },
-  { text: '全面發展 SEL',           ans: 'C', hint: '全面發展是 C 永續階段的整體目標。',                photo: 'slide-03.jpg', tag: '三年計劃總覽' },
+  { text: '全面發展 SEL',           ans: 'C', hint: '全面發展是 C 永續階段的整體目標。',                photo: 'slide-03.jpg', tag: '四年計畫總覽' },
   { text: '教案設計（導師）',       ans: 'A', hint: 'A 奠基階段讓導師設計 SEL 教案，建立課程基礎。',    photo: 'photo-workshop.jpg', tag: 'KIST 開學前共備工作坊' },
   { text: '評量融入＆雙語 SEL 晨會', ans: 'B', hint: '評量融入是 B 實踐階段讓 SEL 系統化的重要步驟。', photo: 'photo-checkin.jpg', tag: '雙語 SEL 晨會・教室現場' },
-  { text: '全校節慶＆校慶 SEL 融入', ans: 'C', hint: '將 SEL 融入重大節慶是 C 永續文化深化的展現。',   photo: 'slide-03.jpg', tag: '三年計劃總覽' }
+  { text: '全校節慶＆校慶 SEL 融入', ans: 'C', hint: '將 SEL 融入重大節慶是 C 永續文化深化的展現。',   photo: 'slide-03.jpg', tag: '四年計畫總覽' }
 ];
 
 const Q2 = [
@@ -779,7 +779,7 @@ function showResults() {
   ring.style.borderColor = overall >= 80 ? 'var(--success)' : overall >= 60 ? 'var(--gold)' : 'var(--error)';
 
   const msgs = [
-    [90, '🌟 傑出！您對辰光 SEL 三年施作掌握得非常透徹！'],
+    [90, '🌟 傑出！您對辰光 SEL 四年施作掌握得非常透徹！'],
     [80, '👏 優秀！SEL 理念已深植心中，值得推薦給全縣！'],
     [60, '💪 良好！繼續深化對 SEL 系統推動的理解！'],
     [0,  '📚 加油！歡迎重新複習辰光 SEL 施作歷程再挑戰！']
@@ -790,7 +790,7 @@ function showResults() {
   document.getElementById('breakdown').innerHTML = `
     <h3 style="margin-bottom:14px; font-size:1rem; font-weight:700;">成績明細</h3>
     <div class="brow">
-      <span>🗓️ 關卡一：三年施作計劃（MCQ）</span>
+      <span>🗓️ 關卡一：四年施作計畫（MCQ）</span>
       <span style="font-weight:700; color:${G.lv1MCQ/Q1.length>=.7?'var(--success)':'var(--gold)'}">
         ${G.lv1MCQ} / ${Q1.length}
       </span>
