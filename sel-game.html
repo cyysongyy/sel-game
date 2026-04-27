@@ -827,9 +827,10 @@ function showResults() {
   data.code = code;
 
   saveScore(data);
-  if (WEBHOOK_URL) fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data) }).catch(() => {});
+  if (WEBHOOK_URL) {
+    const q = `?n=${encodeURIComponent(data.n)}&s=${encodeURIComponent(data.s)}&p=${data.p}&l1=${data.l1}&l2=${data.l2}&t=${encodeURIComponent(data.t)}`;
+    new Image().src = WEBHOOK_URL + q;
+  }
 
   showScreen('s-result');
 }
