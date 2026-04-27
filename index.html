@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>辰光國小 SEL 互動體驗遊戲</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal: #1a8a8a;
+      --teal-dark: #126868;
+      --teal-light: #5ec8c8;
+      --green: #27ae60;
+      --green-dark: #1e8449;
+      --navy: #1a2332;
+      --navy2: #243447;
+      --orange: #e67e22;
+      --blue: #3498db;
+      --gold: #f1c40f;
+      --gray: #8e9eb0;
+      --success: #2ecc71;
+      --error: #e74c3c;
+    }
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: linear-gradient(145deg, #0f1c2e 0%, #0d4f5c 60%, #112a1e 100%);
+      min-height: 100vh;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* ── STARS ── */
+    #stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    .star {
+      position: absolute; border-radius: 50%; background: #fff;
+      opacity: .3; animation: twinkle var(--d, 3s) ease-in-out infinite;
+    }
+    @keyframes twinkle { 0%,100%{opacity:.1} 50%{opacity:.7} }
+
+    /* ── SCREENS ── */
+    .screen { display: none; position: relative; z-index: 1; min-height: 100vh; padding: 24px 16px; flex-direction: column; align-items: center; }
+    .screen.active { display: flex; }
+
+    /* ── FADE IN ── */
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+    .fade-up { animation: fadeUp .5s ease both; }
+
+    /* ── SHARED CARD ── */
+    .card {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 20px;
+      backdrop-filter: blur(12px);
+      padding: 32px;
+      width: 100%; max-width: 520px;
+    }
+
+    /* ── BTN ── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px 28px; border: none; border-radius: 12px;
+      font-size: 1rem; font-weight: 700; font-family: inherit;
+      cursor: pointer; transition: all .25s; text-decoration: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--teal), var(--green));
+      color: #fff; width: 100%;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,138,138,.45); }
+    .btn-secondary {
+      background: rgba(255,255,255,.12); color: #fff;
+      border: 1px solid rgba(255,255,255,.25); padding: 10px 18px;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,.22); }
+    .btn-danger { background: rgba(231,76,60,.3); color: #e74c3c; border: 1px solid #e74c3c; padding: 10px 18px; }
+
+    /* ── INPUT ── */
+    .inp {
+      width: 100%; padding: 13px 16px; margin-top: 6px;
+      border: 2px solid rgba(255,255,255,.2); border-radius: 11px;
+      background: rgba(255,255,255,.08); color: #fff;
+      font-size: 1rem; font-family: inherit; transition: border-color .25s;
+    }
+    .inp:focus { outline: none; border-color: var(--teal-light); }
+    .inp::placeholder { color: rgba(255,255,255,.3); }
+
+    /* ── WELCOME ── */
+    .badge-circle {
+      width: 110px; height: 110px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal), var(--green));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 44px; margin: 0 auto 18px;
+      box-shadow: 0 8px 32px rgba(26,138,138,.45);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
+
+    /* ── LEVEL SELECT ── */
+    .level-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; width: 100%; max-width: 760px; margin: 24px 0; }
+    .lv-card {
+      background: rgba(255,255,255,.07); border: 2px solid rgba(255,255,255,.13);
+      border-radius: 20px; padding: 28px 20px; text-align: center;
+      cursor: pointer; transition: all .3s; position: relative; overflow: hidden;
+    }
+    .lv-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; }
+    .lv-card.teal::before { background: linear-gradient(90deg,var(--teal),var(--green)); }
+    .lv-card.orange::before { background: linear-gradient(90deg,var(--orange),var(--gold)); }
+    .lv-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,.3); box-shadow: 0 16px 40px rgba(0,0,0,.35); }
+    .lv-icon { font-size: 2.8rem; margin-bottom: 10px; }
+    .lv-tag {
+      display: inline-block; padding: 4px 12px; border-radius: 20px;
+      font-size: .8rem; font-weight: 600; margin-top: 10px;
+    }
+
+    /* ── PROGRESS BAR ── */
+    .prog-wrap { width: 100%; max-width: 680px; margin-bottom: 20px; }
+    .prog-meta { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: .88rem; color: var(--gray); }
+    .prog-bar { height: 6px; background: rgba(255,255,255,.13); border-radius: 3px; }
+    .prog-fill { height: 100%; background: linear-gradient(90deg,var(--teal),var(--green)); border-radius: 3px; transition: width .5s ease; }
+
+    /* ── QUIZ ── */
+    .q-card { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.13); border-radius: 20px; padding: 28px; width: 100%; max-width: 680px; }
+    .q-num { font-size: .82rem; color: var(--teal-light); font-weight: 700; letter-spacing: .06em; margin-bottom: 10px; }
+    .q-text { font-size: 1.22rem; font-weight: 700; line-height: 1.65; margin-bottom: 22px; }
+    .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    .opt {
+      padding: 15px 14px; border: 2px solid rgba(255,255,255,.18); border-radius: 11px;
+      background: rgba(255,255,255,.05); color: #fff;
+      font-size: .95rem; font-family: inherit;
+      cursor: pointer; text-align: left; line-height: 1.45; transition: all .25s;
+    }
+    .opt:hover { border-color: var(--teal-light); background: rgba(26,138,138,.2); transform: translateY(-1px); }
+    .opt.correct { border-color: var(--success); background: rgba(46,204,113,.18); }
+    .opt.wrong { border-color: var(--error); background: rgba(231,76,60,.18); }
+    .opt.disabled { cursor: not-allowed; }
+
+    .feedback {
+      margin-top: 16px; padding: 14px 18px; border-radius: 11px;
+      border-left: 4px solid var(--teal); background: rgba(255,255,255,.05);
+      font-size: .9rem; line-height: 1.55;
+    }
+    .feedback.ok { border-left-color: var(--success); }
+    .feedback.no { border-left-color: var(--error); }
+
+    /* ── MATCHING ── */
+    .match-item-card {
+      background: linear-gradient(135deg, rgba(26,138,138,.28), rgba(39,174,96,.18));
+      border: 2px solid var(--teal); border-radius: 20px;
+      padding: 28px; text-align: center; width: 100%; max-width: 580px; margin-bottom: 26px;
+    }
+    .match-item-text { font-size: 1.35rem; font-weight: 800; }
+    .phase-btns { display: flex; gap: 14px; width: 100%; max-width: 580px; flex-wrap: wrap; justify-content: center; }
+    .phase-btn {
+      flex: 1; min-width: 140px; padding: 18px 12px;
+      border: 2px solid; border-radius: 14px;
+      background: transparent; color: #fff; font-size: .98rem;
+      font-family: inherit; font-weight: 700; cursor: pointer; transition: all .25s; line-height: 1.5;
+    }
+    .phase-btn.A { border-color: var(--green); background: rgba(39,174,96,.1); }
+    .phase-btn.A:hover { background: rgba(39,174,96,.3); transform: translateY(-2px); }
+    .phase-btn.B { border-color: var(--teal); background: rgba(26,138,138,.1); }
+    .phase-btn.B:hover { background: rgba(26,138,138,.3); transform: translateY(-2px); }
+    .phase-btn.C { border-color: #6a9abf; background: rgba(36,52,71,.5); }
+    .phase-btn.C:hover { background: rgba(36,52,71,.8); transform: translateY(-2px); }
+    .dot-row { display: flex; gap: 10px; margin-top: 20px; }
+    .dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,.25); transition: all .3s; }
+    .dot.ok { background: var(--success); border-color: var(--success); }
+    .dot.no { background: var(--error); border-color: var(--error); }
+
+    /* ── RESULT ── */
+    .score-ring {
+      width: 190px; height: 190px; border-radius: 50%;
+      border: 8px solid var(--teal); display: flex; flex-direction: column;
+      align-items: center; justify-content: center; margin: 0 auto 26px;
+      background: radial-gradient(circle, rgba(26,138,138,.2), transparent);
+      animation: ringPop .8s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    @keyframes ringPop { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+    .score-pct { font-size: 2.8rem; font-weight: 900; color: var(--teal-light); }
+    .breakdown { background: rgba(255,255,255,.07); border-radius: 14px; padding: 22px; margin-bottom: 22px; width: 100%; max-width: 520px; }
+    .brow { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,.09); }
+    .brow:last-child { border: none; }
+
+    /* ── ADMIN ── */
+    .admin-wrap { width: 100%; max-width: 960px; }
+    .stat-row { display: flex; gap: 32px; flex-wrap: wrap; background: rgba(255,255,255,.06); border-radius: 14px; padding: 22px 28px; margin-bottom: 22px; }
+    .stat-box { text-align: center; }
+    .stat-num { font-size: 2.1rem; font-weight: 900; }
+    .stat-lbl { font-size: .82rem; color: var(--gray); }
+    table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,.05); border-radius: 14px; overflow: hidden; }
+    th { background: rgba(26,138,138,.28); padding: 13px 15px; text-align: left; font-size: .88rem; }
+    td { padding: 13px 15px; border-bottom: 1px solid rgba(255,255,255,.07); font-size: .88rem; }
+    tr:last-child td { border: none; }
+    tr:hover td { background: rgba(255,255,255,.04); }
+    .badge { display:inline-block; padding:4px 10px; border-radius:8px; font-weight:700; font-size:.82rem; }
+    .badge.hi { background:rgba(46,204,113,.25); color:#2ecc71; }
+    .badge.md { background:rgba(241,196,15,.25); color:#f1c40f; }
+    .badge.lo { background:rgba(231,76,60,.25); color:#e74c3c; }
+
+    /* ── MODAL ── */
+    #modal-bg {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.72); z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .modal-box {
+      background: var(--navy2); border-radius: 20px; padding: 38px;
+      width: 90%; max-width: 360px; text-align: center;
+      border: 1px solid rgba(255,255,255,.15);
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+      padding: 14px 26px; border-radius: 12px; font-weight: 600; z-index: 300;
+      animation: toastIn .3s ease, toastOut .3s ease 2.7s forwards;
+    }
+    .toast.ok { background: var(--success); }
+    .toast.no { background: var(--error); }
+    @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(16px)} to{opacity:1;transform:translateX(-50%)} }
+    @keyframes toastOut { to{opacity:0} }
+
+    /* ── FOOTER ── */
+    #foot { position: fixed; bottom: 8px; right: 12px; font-size: .68rem; color: rgba(255,255,255,.18); cursor: pointer; user-select: none; z-index: 1; }
+
+    /* ── QUESTION PHOTO ── */
+    .q-photo-wrap {
+      margin-bottom: 14px; border-radius: 12px; overflow: hidden;
+      position: relative; max-height: 200px;
+    }
+    .q-photo-wrap img {
+      width: 100%; object-fit: cover; max-height: 200px;
+      display: block; filter: brightness(.92);
+      transition: filter .3s;
+    }
+    .q-photo-wrap img:hover { filter: brightness(1); }
+    .q-photo-tag {
+      position: absolute; bottom: 8px; left: 10px;
+      background: rgba(0,0,0,.55); color: var(--teal-light);
+      font-size: .72rem; padding: 3px 10px; border-radius: 20px;
+      letter-spacing: .04em;
+    }
+    /* match photo */
+    .m-photo-wrap {
+      width: 100%; max-width: 580px; border-radius: 14px; overflow: hidden;
+      margin-bottom: 18px; max-height: 160px;
+    }
+    .m-photo-wrap img { width: 100%; object-fit: cover; max-height: 160px; display: block; }
+    /* welcome showcase */
+    .welcome-photo {
+      display: flex; gap: 10px; margin-top: 22px; max-width: 520px; width: 100%;
+    }
+    .welcome-photo img {
+      flex: 1; border-radius: 12px; object-fit: cover;
+      height: 110px; filter: brightness(.8);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .opts { grid-template-columns: 1fr; }
+      .level-grid { grid-template-columns: 1fr; }
+      .phase-btns { flex-direction: column; }
+      .q-text { font-size: 1.08rem; }
+      .card { padding: 22px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Stars -->
+<div id="stars"></div>
+
+<!-- ════════════════ SCREEN: WELCOME ════════════════ -->
+<div class="screen active" id="s-welcome">
+  <div class="fade-up" style="text-align:center; margin: 36px 0 28px;">
+    <div class="badge-circle">🏫</div>
+    <h1 style="font-size:1.9rem; font-weight:900; color:var(--teal-light);">辰光國小 SEL 互動體驗</h1>
+    <p style="color:var(--gray); margin-top:6px;">社會情緒學習實施歷程 — 互動學習遊戲</p>
+  </div>
+  <div class="card fade-up" style="animation-delay:.15s">
+    <h2 style="text-align:center; margin-bottom:6px;">👋 歡迎！</h2>
+    <p style="color:var(--gray); font-size:.9rem; text-align:center; margin-bottom:22px;">請填寫資訊，開始探索辰光 SEL 三年施作歷程</p>
+    <label style="font-size:.88rem; color:var(--gray);">您的姓名</label>
+    <input class="inp" id="inp-name" placeholder="請輸入您的姓名…" autocomplete="off">
+    <label style="font-size:.88rem; color:var(--gray); margin-top:14px; display:block;">服務學校（選填）</label>
+    <input class="inp" id="inp-school" placeholder="例：嘉義縣○○國小" autocomplete="off">
+    <button class="btn btn-primary" style="margin-top:22px;" onclick="startGame()">🚀 開始體驗</button>
+    <p style="text-align:center; color:rgba(255,255,255,.25); font-size:.78rem; margin-top:14px;">共 2 大關卡 · 約 6–10 分鐘</p>
+  </div>
+  <div class="welcome-photo fade-up" style="animation-delay:.3s">
+    <img src="photo-circle.jpg"      alt="週四圍圈現場"   title="週四圍圈—圖書館">
+    <img src="photo-schoolbase.jpg" alt="週四校本課程"   title="每週四導師校本SEL課程">
+    <img src="photo-emotion.jpg"    alt="情緒溫度計看板" title="情緒溫度計工具">
+    <img src="photo-classroom.jpg"  alt="辰光共同語言"   title="辰光共同語言數位遊戲">
+    <img src="photo-checkin.jpg"    alt="Check-in 教室"  title="教室 SEL 日常">
+  </div>
+</div>
+
+<!-- ════════════════ SCREEN: LEVEL SELECT ════════════════ -->
+<div class="screen" id="s-levels">
+  <div style="text-align:center; margin:32px 0 4px;">
+    <h2 style="font-size:1.75rem; font-weight:900;">選擇關卡</h2>
+    <p style="color:var(--gray); margin-top:8px;" id="greeting-txt">歡迎！請選擇關卡。</p>
+  </div>
+  <div class="level-grid fade-up">
+    <div class="lv-card teal" onclick="startLevel(1)">
+      <div class="lv-icon">🗓️</div>
+      <h3 style="font-size:1.1rem; margin-bottom:4px;">關卡一</h3>
+      <h4 style="color:var(--teal-light); margin-bottom:8px;">三年施作計劃</h4>
+      <p style="font-size:.85rem; color:var(--gray);">113–116 學年度<br>A 奠基 · B 實踐 · C 永續</p>
+      <span class="lv-tag" style="background:rgba(26,138,138,.28); color:var(--teal-light);">7 題 + 配對</span>
+      <div id="lv1-status" style="margin-top:10px; font-size:.85rem;"></div>
+    </div>
+    <div class="lv-card orange" onclick="startLevel(2)">
+      <div class="lv-icon">📅</div>
+      <h3 style="font-size:1.1rem; margin-bottom:4px;">關卡二</h3>
+      <h4 style="color:#f0a030; margin-bottom:8px;">每週 SEL 行事曆</h4>
+      <p style="font-size:.85rem; color:var(--gray);">114 學年度系統推動<br>四大運作機制</p>
+      <span class="lv-tag" style="background:rgba(230,126,34,.28); color:#f0a030;">8 題</span>
+      <div id="lv2-status" style="margin-top:10px; font-size:.85rem;"></div>
+    </div>
+  </div>
+  <button class="btn btn-primary" id="finish-btn" onclick="showResults()" style="max-width:280px; display:none;">
+    🏆 查看最終成績
+  </button>
+</div>
+
+<!-- ════════════════ SCREEN: QUIZ ════════════════ -->
+<div class="screen" id="s-quiz">
+  <div class="prog-wrap fade-up">
+    <div class="prog-meta">
+      <span id="q-progress">第 1 題 / 共 7 題</span>
+      <span id="q-lv-badge" style="background:rgba(26,138,138,.28); color:var(--teal-light); padding:3px 12px; border-radius:20px; font-size:.82rem; font-weight:600;">關卡一</span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="q-card fade-up" id="q-card">
+    <div id="q-photo-area"></div>
+    <div class="q-num" id="q-num">第 1 題</div>
+    <div class="q-text" id="q-text"></div>
+    <div class="opts" id="opts"></div>
+    <div id="q-feedback"></div>
+  </div>
+  <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()" style="max-width:280px; margin-top:18px; display:none;">
+    下一題 →
+  </button>
+</div>
+
+<!-- ════════════════ SCREEN: MATCHING ════════════════ -->
+<div class="screen" id="s-match">
+  <div style="text-align:center; margin:26px 0 8px;" class="fade-up">
+    <h2 style="font-size:1.5rem; font-weight:900;">🎯 分類配對挑戰</h2>
+    <p style="color:var(--gray); margin-top:6px;">請將項目分配到正確的施作階段</p>
+  </div>
+  <div class="prog-wrap fade-up" style="animation-delay:.1s">
+    <div class="prog-meta">
+      <span id="m-progress">第 1 項 / 共 6 項</span>
+      <span style="background:rgba(26,138,138,.28); color:var(--teal-light); padding:3px 12px; border-radius:20px; font-size:.82rem; font-weight:600;">關卡一・配對關</span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="m-fill" style="width:0%"></div></div>
+  </div>
+  <div id="m-photo-area"></div>
+  <div class="match-item-card fade-up" style="animation-delay:.15s">
+    <p style="font-size:.82rem; color:var(--gray); margin-bottom:10px;">這個項目屬於哪個施作階段？</p>
+    <div class="match-item-text" id="m-item">硬體建置</div>
+  </div>
+  <div class="phase-btns">
+    <button class="phase-btn A" onclick="matchPick('A')">🏗️ A 奠基<br><small style="font-weight:400;opacity:.7">113 學年度</small></button>
+    <button class="phase-btn B" onclick="matchPick('B')">🚀 B 實踐<br><small style="font-weight:400;opacity:.7">114–115 學年度</small></button>
+    <button class="phase-btn C" onclick="matchPick('C')">🌱 C 永續<br><small style="font-weight:400;opacity:.7">116 學年度</small></button>
+  </div>
+  <div class="dot-row" id="dot-row"></div>
+  <div id="m-feedback" style="min-height:60px; margin-top:14px; width:100%; max-width:580px;"></div>
+</div>
+
+<!-- ════════════════ SCREEN: RESULT ════════════════ -->
+<div class="screen" id="s-result">
+  <div style="width:100%; max-width:520px; text-align:center;" class="fade-up">
+    <h2 style="font-size:1.75rem; font-weight:900; margin-bottom:22px;">🎉 挑戰完成！</h2>
+    <div class="score-ring" id="score-ring">
+      <div class="score-pct" id="final-pct">--%</div>
+      <div style="font-size:.82rem; color:var(--gray);">正確率</div>
+    </div>
+    <div id="result-msg" style="font-size:1.05rem; margin-bottom:18px;"></div>
+    <div class="breakdown" id="breakdown"></div>
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="resetGame()">🔄 重新挑戰</button>
+      <button class="btn btn-primary" onclick="toLevels()" style="max-width:180px;">🏠 返回選關</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ SCREEN: ADMIN ════════════════ -->
+<div class="screen" id="s-admin">
+  <div class="admin-wrap fade-up">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+      <h2 style="font-size:1.45rem; font-weight:900;">📊 後台管理 — 成績總覽</h2>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-secondary" onclick="importCode()" style="font-size:.85rem;">📥 匯入代碼</button>
+        <button class="btn btn-secondary" onclick="exportCSV()" style="font-size:.85rem;">📤 匯出 CSV</button>
+        <button class="btn btn-danger" onclick="clearAll()" style="font-size:.85rem;">🗑️ 清除全部</button>
+        <button class="btn btn-secondary" onclick="showScreen('s-welcome')" style="font-size:.85rem;">← 返回</button>
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-box"><div class="stat-num" id="st-total" style="color:var(--teal-light)">0</div><div class="stat-lbl">參與人數</div></div>
+      <div class="stat-box"><div class="stat-num" id="st-avg" style="color:var(--green)">—</div><div class="stat-lbl">平均正確率</div></div>
+      <div class="stat-box"><div class="stat-num" id="st-high" style="color:var(--gold)">—</div><div class="stat-lbl">最高分</div></div>
+      <div class="stat-box"><div class="stat-num" id="st-pass" style="color:var(--blue)">—</div><div class="stat-lbl">80分以上人數</div></div>
+    </div>
+    <div id="admin-tbl-wrap">
+      <table id="admin-tbl">
+        <thead>
+          <tr>
+            <th>#</th><th>姓名</th><th>學校</th><th>總正確率</th>
+            <th>關卡一</th><th>關卡二</th><th>完成時間</th>
+          </tr>
+        </thead>
+        <tbody id="admin-tbody">
+          <tr><td colspan="7" style="text-align:center; color:var(--gray); padding:28px;">尚無成績資料</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Footer (click to open admin) -->
+<div id="foot" onclick="openAdmin()">辰光SEL © 2025 ｜ 後台</div>
+
+<!-- ════════════════════════ SCRIPT ════════════════════════ -->
+<script>
+// ──────────────────────────────────────────────
+//  CONFIGURATION
+// ──────────────────────────────────────────────
+const ADMIN_PWD    = 'sel2025';       // 後台管理密碼
+const WEBHOOK_URL  = '';              // 可選：Google Apps Script URL，用於跨裝置收集成績
+
+// ──────────────────────────────────────────────
+//  QUESTION DATA
+// ──────────────────────────────────────────────
+const Q1 = [
+  {
+    q: '辰光國小 SEL 三年計劃分為哪三個施作階段？',
+    opts: ['A 起步、B 推動、C 深化', 'A 奠基、B 實踐、C 永續', 'A 準備、B 施作、C 擴展', 'A 探索、B 執行、C 評估'],
+    ans: 1,
+    exp: '辰光 SEL 三年計劃分為：A 奠基（113學年度）、B 實踐（114–115學年度）、C 永續（116學年度）三大階段。',
+    photo: 'slide-03.jpg', tag: '三年計劃總覽'
+  },
+  {
+    q: '「A 奠基」階段在哪個學年度實施？',
+    opts: ['112 學年度', '114 學年度', '113 學年度', '115 學年度'],
+    ans: 2,
+    exp: 'A 奠基階段在 113 學年度，主要進行硬體建置與班級、校園環境佈置，打好 SEL 推動的基礎。',
+    photo: 'slide-03.jpg', tag: '三年計劃總覽'
+  },
+  {
+    q: '以下哪一項屬於「A 奠基」階段的工作？',
+    opts: ['全校性圍圈（週四）', '全面發展 SEL', 'KIST 開學前共備', '全校節慶＆校慶 SEL 融入'],
+    ans: 2,
+    exp: 'KIST 開學前共備屬於 A 奠基階段，讓教師在開學前就對 SEL 有共同的理解與準備。',
+    photo: 'photo-workshop.jpg', tag: 'KIST 開學前共備工作坊'
+  },
+  {
+    q: '「B 實踐」階段跨越哪些學年度？',
+    opts: ['113–114 學年度', '115–116 學年度', '112–113 學年度', '114–115 學年度'],
+    ans: 3,
+    exp: 'B 實踐階段跨越 114–115 學年度，是全校系統性落實 SEL 的核心階段，包含週四圍圈、夕會圍圈等機制。',
+    photo: 'slide-03.jpg', tag: '三年計劃總覽'
+  },
+  {
+    q: '科任教師的「CHECK-IN / CHECK-OUT」屬於哪個施作階段？',
+    opts: ['A 奠基', 'C 永續', 'B 實踐', '每個階段都有'],
+    ans: 2,
+    exp: '科任的 CHECK-IN / CHECK-OUT 是 B 實踐階段的重要機制，讓 SEL 情緒覺察延伸到各科任課堂。',
+    photo: 'photo-checkin.jpg', tag: '科任 Check-in / Check-out 現場'
+  },
+  {
+    q: '「C 永續」階段強調哪三個面向的全面發展？',
+    opts: ['師、生、校', '班級、校園、社區', '導師、科任、行政', '師、親、生'],
+    ans: 3,
+    exp: 'C 永續階段以師（典範課程）、親（SEL活動參與）、生（生活經驗體現）三面向全面推展，讓 SEL 成為校園文化。',
+    photo: 'slide-03.jpg', tag: '三年計劃總覽'
+  },
+  {
+    q: '「A 奠基」階段導入了哪些 SEL 工具（選最完整的答案）？',
+    opts: ['只有情緒溫度計', '情緒溫度計和情緒卡', '只有情緒卡', 'SEL 教案和情緒日記'],
+    ans: 1,
+    exp: '奠基階段同時導入情緒溫度計與情緒卡，建立師生共同的情緒語言，是往後 SEL 課程的重要工具。',
+    photo: 'photo-emotion.jpg', tag: '情緒溫度計・四區看板'
+  }
+];
+
+const MATCH_ITEMS = [
+  { text: '硬體建置',               ans: 'A', hint: '奠基階段先完善校園 SEL 環境的硬體條件。',          photo: 'slide-03.jpg', tag: '三年計劃總覽' },
+  { text: '全校性圍圈（週四）',     ans: 'B', hint: '週四全校圍圈是 B 實踐階段的核心機制。',            photo: 'photo-circle.jpg', tag: '週四圍圈・圖書館現場' },
+  { text: '全面發展 SEL',           ans: 'C', hint: '全面發展是 C 永續階段的整體目標。',                photo: 'slide-03.jpg', tag: '三年計劃總覽' },
+  { text: '教案設計（導師）',       ans: 'A', hint: 'A 奠基階段讓導師設計 SEL 教案，建立課程基礎。',    photo: 'photo-workshop.jpg', tag: 'KIST 開學前共備工作坊' },
+  { text: '評量融入＆雙語 SEL 晨會', ans: 'B', hint: '評量融入是 B 實踐階段讓 SEL 系統化的重要步驟。', photo: 'photo-checkin.jpg', tag: '雙語 SEL 晨會・教室現場' },
+  { text: '全校節慶＆校慶 SEL 融入', ans: 'C', hint: '將 SEL 融入重大節慶是 C 永續文化深化的展現。',   photo: 'slide-03.jpg', tag: '三年計劃總覽' }
+];
+
+const Q2 = [
+  {
+    q: '114 學年度「週四圍圈」的固定時間是？',
+    opts: ['14:00 – 14:20', '15:00 – 15:20', '15:30 – 16:00', '16:00 – 16:30'],
+    ans: 1,
+    exp: '週四圍圈固定在每週四 15:00–15:20，校長帶頭示範，全體教師共同參與，形成學校 SEL 文化。',
+    photo: 'photo-circle.jpg', tag: '週四圍圈・圖書館現場'
+  },
+  {
+    q: '週四圍圈中，1–3 年級在哪個空間進行？',
+    opts: ['樂活空間', '體育館', '音樂教室', '圖書館'],
+    ans: 3,
+    exp: '1–3 年級在圖書館進行週四圍圈；4–6 年級在樂活空間，分區設計讓活動更貼近各年段需求。',
+    photo: 'photo-circle.jpg', tag: '週四圍圈・圖書館現場'
+  },
+  {
+    q: '週四圍圈中，4–6 年級在哪個空間進行？',
+    opts: ['圖書館', '體育館', '樂活空間', '視聽教室'],
+    ans: 2,
+    exp: '4–6 年級在樂活空間進行週四圍圈，與 1–3 年級的圖書館分開，便於依年段設計不同深度的 SEL 活動。',
+    photo: 'photo-circle.jpg', tag: '週四圍圈・圖書館現場'
+  },
+  {
+    q: '每週四導師在班上進行校本 SEL 課程，課程依序推進的第一個核心能力是？',
+    opts: ['自我管理', '人際技能', '社會覺察', '自我覺察'],
+    ans: 3,
+    exp: '校本 SEL 課程以「自我覺察」為起點，依序推進自我管理→社會覺察→人際技能→負責任的決策，系統性培養學生五大核心能力。',
+    photo: 'photo-schoolbase.jpg', tag: '每週四・導師校本 SEL 正式課程'
+  },
+  {
+    q: '「行政夕會圍圈」每週何時舉行？',
+    opts: ['週二 16:00', '週三 16:00', '週四 16:00', '週一 16:00'],
+    ans: 3,
+    exp: '行政夕會圍圈在每週一 16:00 舉行；導師圈由教導主持，科任職員圈由校長主持，體現上行下效。',
+    photo: 'slide-05.jpg', tag: '圍圈魔力—SEL 最重要的場域'
+  },
+  {
+    q: '行政夕會圍圈中，「科任職員圈」由誰主持？',
+    opts: ['教導主任', '教務組長', '輔導主任', '校長'],
+    ans: 3,
+    exp: '科任職員圈由校長主持，校長以身作則帶動 SEL 文化；導師圈則由教導主任主持。',
+    photo: 'slide-05.jpg', tag: '圍圈魔力—SEL 最重要的場域'
+  },
+  {
+    q: '全校師生圍圈的最終目標是？',
+    opts: ['提升教師情緒管理', '增加親師溝通機會', '學生自主帶領', '建立全校 SEL 共識'],
+    ans: 2,
+    exp: '最終目標是「學生自主帶領」，讓 SEL 圍圈從師職主導逐步走向學生自發帶動，實現學生領導。',
+    photo: 'slide-05.jpg', tag: '圍圈魔力—SEL 最重要的場域'
+  },
+  {
+    q: '「期初/期末檢核」中，期中進行的工作是？',
+    opts: ['教案分享（開學前共備）', 'SEL 教案＆check-in 紀錄表', '心得分享（結合活動）', '外部口頭回饋改進'],
+    ans: 3,
+    exp: '期中進行「外部口頭回饋改進」，引入外部專業視角協助精進；期初是教案分享共備，期末是心得分享結合活動。',
+    photo: 'photo-checkin.jpg', tag: 'SEL 教案 & Check-in 紀錄'
+  }
+];
+
+// ──────────────────────────────────────────────
+//  GAME STATE
+// ──────────────────────────────────────────────
+let G = {
+  name: '', school: '',
+  lv: 0, qi: 0,
+  lvAnswers: [],
+  lv1MCQ: 0, lv1Match: 0, lv1Done: false,
+  lv2MCQ: 0,            lv2Done: false,
+  mi: 0, mScore: 0,
+  startTime: null
+};
+
+// ──────────────────────────────────────────────
+//  INIT: STARS
+// ──────────────────────────────────────────────
+(function stars() {
+  const c = document.getElementById('stars');
+  for (let i = 0; i < 90; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() > .7 ? 3 : 2;
+    Object.assign(s.style, {
+      left: Math.random() * 100 + '%', top: Math.random() * 100 + '%',
+      width: sz + 'px', height: sz + 'px',
+      '--d': (2 + Math.random() * 5) + 's',
+      animationDelay: Math.random() * 5 + 's'
+    });
+    c.appendChild(s);
+  }
+})();
+
+// ──────────────────────────────────────────────
+//  SCREEN
+// ──────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ──────────────────────────────────────────────
+//  WELCOME → START
+// ──────────────────────────────────────────────
+function startGame() {
+  const n = document.getElementById('inp-name').value.trim();
+  if (!n) { toast('請輸入您的姓名', 'no'); return; }
+  G.name   = n;
+  G.school = document.getElementById('inp-school').value.trim() || '未填寫';
+  G.startTime = new Date();
+  document.getElementById('greeting-txt').textContent = `歡迎 ${n} 校長！請選擇關卡開始體驗。`;
+  refreshLvStatus();
+  showScreen('s-levels');
+}
+
+function refreshLvStatus() {
+  const l1 = document.getElementById('lv1-status');
+  const l2 = document.getElementById('lv2-status');
+  const total1 = Q1.length + MATCH_ITEMS.length;
+  const total2 = Q2.length;
+  l1.innerHTML = G.lv1Done ? `<span style="color:var(--success)">✓ 完成：${pct(G.lv1MCQ + G.lv1Match, total1)}%</span>` : '';
+  l2.innerHTML = G.lv2Done ? `<span style="color:var(--success)">✓ 完成：${pct(G.lv2MCQ, total2)}%</span>` : '';
+  document.getElementById('finish-btn').style.display = (G.lv1Done && G.lv2Done) ? 'inline-flex' : 'none';
+}
+
+function pct(got, total) { return Math.round(got / total * 100); }
+
+// ──────────────────────────────────────────────
+//  LEVEL START
+// ──────────────────────────────────────────────
+function startLevel(lv) {
+  G.lv = lv; G.qi = 0; G.lvAnswers = [];
+  document.getElementById('q-lv-badge').textContent = `關卡${lv === 1 ? '一' : '二'}`;
+  loadQ();
+  showScreen('s-quiz');
+}
+
+function questions() { return G.lv === 1 ? Q1 : Q2; }
+
+function loadQ() {
+  const qs = questions();
+  const q  = qs[G.qi];
+  const tot = qs.length;
+  document.getElementById('q-progress').textContent = `第 ${G.qi + 1} 題 / 共 ${tot} 題`;
+  document.getElementById('prog-fill').style.width   = `${G.qi / tot * 100}%`;
+  document.getElementById('q-num').textContent  = `第 ${G.qi + 1} 題`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('next-btn').style.display = 'none';
+  document.getElementById('q-feedback').innerHTML   = '';
+
+  // 顯示現場照片
+  const photoEl = document.getElementById('q-photo-area');
+  if (q.photo) {
+    photoEl.innerHTML = `
+      <div class="q-photo-wrap">
+        <img src="${q.photo}" alt="${q.tag || '實際現場'}"
+             onerror="this.parentElement.style.display='none'">
+        <span class="q-photo-tag">📸 ${q.tag || '實際現場'}</span>
+      </div>`;
+  } else {
+    photoEl.innerHTML = '';
+  }
+
+  const optsEl = document.getElementById('opts');
+  optsEl.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const b = document.createElement('button');
+    b.className = 'opt'; b.textContent = o;
+    b.onclick = () => pickAnswer(i);
+    optsEl.appendChild(b);
+  });
+}
+
+function pickAnswer(sel) {
+  const q = questions()[G.qi];
+  const ok = sel === q.ans;
+  G.lvAnswers.push(ok);
+  document.querySelectorAll('.opt').forEach((b, i) => {
+    b.classList.add('disabled'); b.onclick = null;
+    if (i === q.ans) b.classList.add('correct');
+    else if (i === sel && !ok) b.classList.add('wrong');
+  });
+  document.getElementById('q-feedback').innerHTML =
+    `<div class="feedback ${ok ? 'ok' : 'no'} fade-up">
+       ${ok ? '✅ 答對了！' : '❌ 答錯了！'} ${q.exp}
+     </div>`;
+  document.getElementById('next-btn').style.display = 'inline-flex';
+}
+
+function nextQuestion() {
+  const qs = questions();
+  G.qi++;
+  if (G.qi >= qs.length) {
+    const score = G.lvAnswers.filter(Boolean).length;
+    if (G.lv === 1) {
+      G.lv1MCQ = score;
+      startMatching();
+    } else {
+      G.lv2MCQ = score;
+      G.lv2Done = true;
+      refreshLvStatus();
+      toast('關卡二完成！', 'ok');
+      if (G.lv1Done) showResults(); else showScreen('s-levels');
+    }
+  } else { loadQ(); }
+}
+
+// ──────────────────────────────────────────────
+//  MATCHING GAME
+// ──────────────────────────────────────────────
+function startMatching() {
+  G.mi = 0; G.mScore = 0;
+  document.getElementById('dot-row').innerHTML =
+    MATCH_ITEMS.map(() => '<div class="dot"></div>').join('');
+  loadMatch();
+  showScreen('s-match');
+}
+
+function loadMatch() {
+  const item = MATCH_ITEMS[G.mi];
+  document.getElementById('m-item').textContent = item.text;
+  document.getElementById('m-progress').textContent = `第 ${G.mi + 1} 項 / 共 ${MATCH_ITEMS.length} 項`;
+  document.getElementById('m-fill').style.width = `${G.mi / MATCH_ITEMS.length * 100}%`;
+  document.getElementById('m-feedback').innerHTML = '';
+  document.querySelectorAll('.phase-btn').forEach(b => { b.disabled = false; b.style.opacity = '1'; });
+
+  // 顯示配對照片
+  const pa = document.getElementById('m-photo-area');
+  if (item.photo) {
+    pa.innerHTML = `
+      <div class="m-photo-wrap">
+        <img src="${item.photo}" alt="${item.tag || ''}"
+             onerror="this.parentElement.style.display='none'">
+      </div>`;
+  } else { pa.innerHTML = ''; }
+}
+
+function matchPick(phase) {
+  const item = MATCH_ITEMS[G.mi];
+  const ok = phase === item.ans;
+  document.querySelectorAll('.phase-btn').forEach(b => { b.disabled = true; b.style.opacity = '.45'; });
+  const dots = document.querySelectorAll('.dot');
+  dots[G.mi].classList.add(ok ? 'ok' : 'no');
+  if (ok) G.mScore++;
+  const phaseLabel = { A: 'A 奠基（113學年度）', B: 'B 實踐（114–115學年度）', C: 'C 永續（116學年度）' };
+  document.getElementById('m-feedback').innerHTML =
+    `<div class="feedback ${ok ? 'ok' : 'no'} fade-up">
+       ${ok ? '✅ 正確！' : `❌ 正確答案是 ${phaseLabel[item.ans]}`} ${item.hint}
+     </div>`;
+  setTimeout(() => {
+    G.mi++;
+    if (G.mi >= MATCH_ITEMS.length) {
+      G.lv1Match = G.mScore;
+      G.lv1Done  = true;
+      refreshLvStatus();
+      toast('關卡一全部完成！', 'ok');
+      if (G.lv2Done) showResults(); else showScreen('s-levels');
+    } else { loadMatch(); }
+  }, 1800);
+}
+
+// ──────────────────────────────────────────────
+//  RESULTS
+// ──────────────────────────────────────────────
+function showResults() {
+  const tot1 = Q1.length + MATCH_ITEMS.length;
+  const tot2 = Q2.length;
+  const total = tot1 + tot2;
+  const correct = (G.lv1MCQ + G.lv1Match) + G.lv2MCQ;
+  const overall = pct(correct, total);
+  const p1 = pct(G.lv1MCQ + G.lv1Match, tot1);
+  const p2 = pct(G.lv2MCQ, tot2);
+
+  document.getElementById('final-pct').textContent = overall + '%';
+  const ring = document.getElementById('score-ring');
+  ring.style.borderColor = overall >= 80 ? 'var(--success)' : overall >= 60 ? 'var(--gold)' : 'var(--error)';
+
+  const msgs = [
+    [90, '🌟 傑出！您對辰光 SEL 三年施作掌握得非常透徹！'],
+    [80, '👏 優秀！SEL 理念已深植心中，值得推薦給全縣！'],
+    [60, '💪 良好！繼續深化對 SEL 系統推動的理解！'],
+    [0,  '📚 加油！歡迎重新複習辰光 SEL 施作歷程再挑戰！']
+  ];
+  document.getElementById('result-msg').textContent =
+    (msgs.find(([t]) => overall >= t) || msgs[3])[1];
+
+  document.getElementById('breakdown').innerHTML = `
+    <h3 style="margin-bottom:14px; font-size:1rem; font-weight:700;">成績明細</h3>
+    <div class="brow">
+      <span>🗓️ 關卡一：三年施作計劃（MCQ）</span>
+      <span style="font-weight:700; color:${G.lv1MCQ/Q1.length>=.7?'var(--success)':'var(--gold)'}">
+        ${G.lv1MCQ} / ${Q1.length}
+      </span>
+    </div>
+    <div class="brow">
+      <span>🎯 關卡一：分類配對</span>
+      <span style="font-weight:700; color:${G.lv1Match/MATCH_ITEMS.length>=.7?'var(--success)':'var(--gold)'}">
+        ${G.lv1Match} / ${MATCH_ITEMS.length}
+      </span>
+    </div>
+    <div class="brow">
+      <span>📅 關卡二：每週 SEL 行事曆</span>
+      <span style="font-weight:700; color:${p2>=70?'var(--success)':'var(--gold)'}">
+        ${G.lv2MCQ} / ${Q2.length}
+      </span>
+    </div>
+    <div class="brow" style="border:none; padding-top:14px;">
+      <span style="font-weight:700; font-size:1.05rem;">總計</span>
+      <span style="font-weight:900; font-size:1.15rem; color:var(--teal-light)">
+        ${correct} / ${total}（${overall}%）
+      </span>
+    </div>
+  `;
+
+  const data = { n: G.name, s: G.school, p: overall, l1: p1, l2: p2, t: new Date().toISOString() };
+  const code = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  data.code = code;
+
+  saveScore(data);
+  if (WEBHOOK_URL) fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data) }).catch(() => {});
+
+  showScreen('s-result');
+}
+
+
+}
+
+// ──────────────────────────────────────────────
+//  LOCAL STORAGE
+// ──────────────────────────────────────────────
+function saveScore(d) {
+  try {
+    const arr = JSON.parse(localStorage.getItem('sel_scores') || '[]');
+    arr.push(d);
+    localStorage.setItem('sel_scores', JSON.stringify(arr));
+  } catch(e) {}
+}
+
+function getScores() {
+  try { return JSON.parse(localStorage.getItem('sel_scores') || '[]'); } catch(e) { return []; }
+}
+
+// ──────────────────────────────────────────────
+//  RESET / NAV
+// ──────────────────────────────────────────────
+function resetGame() {
+  Object.assign(G, {
+    lv: 0, qi: 0, lvAnswers: [],
+    lv1MCQ: 0, lv1Match: 0, lv1Done: false,
+    lv2MCQ: 0, lv2Done: false,
+    mi: 0, mScore: 0, startTime: new Date()
+  });
+  document.getElementById('lv1-status').innerHTML = '';
+  document.getElementById('lv2-status').innerHTML = '';
+  document.getElementById('finish-btn').style.display = 'none';
+  showScreen('s-levels');
+}
+
+function toLevels() {
+  refreshLvStatus();
+  showScreen('s-levels');
+}
+
+// ──────────────────────────────────────────────
+//  ADMIN PANEL
+// ──────────────────────────────────────────────
+function openAdmin() { renderAdmin(); showScreen('s-admin'); }
+
+if (location.hash === '#admin') setTimeout(openAdmin, 400);
+
+function renderAdmin() {
+  const scores = getScores();
+  document.getElementById('st-total').textContent = scores.length;
+  if (scores.length) {
+    const avg = Math.round(scores.reduce((a, b) => a + b.p, 0) / scores.length);
+    const high = Math.max(...scores.map(s => s.p));
+    const pass = scores.filter(s => s.p >= 80).length;
+    document.getElementById('st-avg').textContent  = avg + '%';
+    document.getElementById('st-high').textContent = high + '%';
+    document.getElementById('st-pass').textContent = pass;
+    document.getElementById('admin-tbody').innerHTML = scores.map((s, i) => {
+      const bc = s.p >= 80 ? 'hi' : s.p >= 60 ? 'md' : 'lo';
+      const t  = new Date(s.t).toLocaleString('zh-TW');
+      return `<tr>
+        <td>${i + 1}</td>
+        <td><strong>${s.n}</strong></td>
+        <td>${s.s}</td>
+        <td><span class="badge ${bc}">${s.p}%</span></td>
+        <td>${s.l1}%</td>
+        <td>${s.l2}%</td>
+        <td style="font-size:.8rem; color:var(--gray)">${t}</td>
+      </tr>`;
+    }).join('');
+  } else {
+    document.getElementById('st-avg').textContent  = '—';
+    document.getElementById('st-high').textContent = '—';
+    document.getElementById('st-pass').textContent = '—';
+    document.getElementById('admin-tbody').innerHTML =
+      '<tr><td colspan="7" style="text-align:center; color:var(--gray); padding:28px;">尚無成績資料</td></tr>';
+  }
+}
+
+function importCode() {
+  const code = prompt('請貼上成績代碼：');
+  if (!code) return;
+  try {
+    const d = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+    if (d.n && d.p !== undefined) {
+      const arr = getScores(); arr.push(d);
+      localStorage.setItem('sel_scores', JSON.stringify(arr));
+      toast(`已匯入 ${d.n} 的成績 ${d.p}%`, 'ok');
+      renderAdmin();
+    } else { toast('代碼格式錯誤', 'no'); }
+  } catch(e) { toast('代碼解析失敗', 'no'); }
+}
+
+function exportCSV() {
+  const s = getScores();
+  if (!s.length) { toast('沒有資料可匯出', 'no'); return; }
+  const hdr = ['姓名', '學校', '總正確率', '關卡一', '關卡二', '完成時間'];
+  const rows = s.map(r => [r.n, r.s, r.p + '%', r.l1 + '%', r.l2 + '%', new Date(r.t).toLocaleString('zh-TW')]);
+  const csv  = [hdr, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: '辰光SEL成績.csv' });
+  a.click();
+}
+
+function clearAll() {
+  if (confirm('確定清除所有成績資料？此動作無法復原。')) {
+    localStorage.removeItem('sel_scores');
+    toast('已清除所有資料', 'ok');
+    renderAdmin();
+  }
+}
+
+// ──────────────────────────────────────────────
+//  TOAST
+// ──────────────────────────────────────────────
+function toast(msg, type) {
+  document.querySelector('.toast')?.remove();
+  const el = document.createElement('div');
+  el.className = `toast ${type}`; el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+</script>
+</body>
+</html>
