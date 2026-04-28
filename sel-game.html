@@ -739,6 +739,11 @@ function nextQuestion() {
       G.lv2Done = true;
       refreshLvStatus();
       toast('關卡二完成！', 'ok');
+      // ── 關卡二個別計分 ──
+      if (WEBHOOK_URL) {
+        const l2s = pct(G.lv2MCQ, Q2.length);
+        new Image().src = WEBHOOK_URL + `?n=${encodeURIComponent(G.name)}&s=${encodeURIComponent(G.school)}&p=0&l1=0&l2=${l2s}&st=${encodeURIComponent('關卡二完成')}`;
+      }
       showScreen('s-levels');  // 回選關卡畫面，讓卡片顯示答對率
     }
   } else { loadQ(); }
@@ -798,6 +803,11 @@ function nextMatch() {
     G.lv1Done  = true;
     refreshLvStatus();
     toast('關卡一全部完成！', 'ok');
+    // ── 關卡一個別計分 ──
+    if (WEBHOOK_URL) {
+      const l1s = pct(G.lv1MCQ + G.lv1Match, Q1.length + MATCH_ITEMS.length);
+      new Image().src = WEBHOOK_URL + `?n=${encodeURIComponent(G.name)}&s=${encodeURIComponent(G.school)}&p=0&l1=${l1s}&l2=0&st=${encodeURIComponent('關卡一完成')}`;
+    }
     showScreen('s-levels');  // 回選關卡畫面，讓卡片顯示答對率
   } else { loadMatch(); }
 }
