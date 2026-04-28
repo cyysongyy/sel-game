@@ -641,6 +641,11 @@ function startGame() {
   G.startTime = new Date();
   document.getElementById('greeting-txt').textContent = `歡迎 ${n} 校長！請選擇關卡開始體驗。`;
   refreshLvStatus();
+  // ── 登入即記錄 ──
+  if (WEBHOOK_URL) {
+    const q = `?n=${encodeURIComponent(G.name)}&s=${encodeURIComponent(G.school)}&p=0&l1=0&l2=0&st=${encodeURIComponent('登入')}`;
+    new Image().src = WEBHOOK_URL + q;
+  }
   showScreen('s-levels');
 }
 
@@ -731,7 +736,7 @@ function nextQuestion() {
       G.lv2Done = true;
       refreshLvStatus();
       toast('關卡二完成！', 'ok');
-      if (G.lv1Done) showResults(); else showScreen('s-levels');
+      showScreen('s-levels');  // 回選關卡畫面，讓卡片顯示答對率
     }
   } else { loadQ(); }
 }
@@ -785,7 +790,7 @@ function matchPick(phase) {
       G.lv1Done  = true;
       refreshLvStatus();
       toast('關卡一全部完成！', 'ok');
-      if (G.lv2Done) showResults(); else showScreen('s-levels');
+      showScreen('s-levels');  // 回選關卡畫面，讓卡片顯示答對率
     } else { loadMatch(); }
   }, 1800);
 }
@@ -849,7 +854,7 @@ function showResults() {
 
   saveScore(data);
   if (WEBHOOK_URL) {
-    const q = `?n=${encodeURIComponent(data.n)}&s=${encodeURIComponent(data.s)}&p=${data.p}&l1=${data.l1}&l2=${data.l2}&t=${encodeURIComponent(data.t)}`;
+    const q = `?n=${encodeURIComponent(data.n)}&s=${encodeURIComponent(data.s)}&p=${data.p}&l1=${data.l1}&l2=${data.l2}&st=${encodeURIComponent('完成')}`;
     new Image().src = WEBHOOK_URL + q;
   }
 
