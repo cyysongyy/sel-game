@@ -382,6 +382,9 @@
   </div>
   <div class="dot-row" id="dot-row"></div>
   <div id="m-feedback" style="min-height:60px; margin-top:14px; width:100%; max-width:580px;"></div>
+  <button class="btn btn-primary" id="match-next-btn" onclick="nextMatch()" style="max-width:280px; margin-top:18px; display:none;">
+    下一題 →
+  </button>
 </div>
 
 <!-- ════════════════ SCREEN: RESULT ════════════════ -->
@@ -758,6 +761,7 @@ function loadMatch() {
   document.getElementById('m-progress').textContent = `第 ${G.mi + 1} 項 / 共 ${MATCH_ITEMS.length} 項`;
   document.getElementById('m-fill').style.width = `${G.mi / MATCH_ITEMS.length * 100}%`;
   document.getElementById('m-feedback').innerHTML = '';
+  document.getElementById('match-next-btn').style.display = 'none';
   document.querySelectorAll('.phase-btn').forEach(b => { b.disabled = false; b.style.opacity = '1'; });
 
   // 顯示配對照片
@@ -783,16 +787,19 @@ function matchPick(phase) {
     `<div class="feedback ${ok ? 'ok' : 'no'} fade-up">
        ${ok ? '✅ 正確！' : `❌ 正確答案是 ${phaseLabel[item.ans]}`} ${item.hint}
      </div>`;
-  setTimeout(() => {
-    G.mi++;
-    if (G.mi >= MATCH_ITEMS.length) {
-      G.lv1Match = G.mScore;
-      G.lv1Done  = true;
-      refreshLvStatus();
-      toast('關卡一全部完成！', 'ok');
-      showScreen('s-levels');  // 回選關卡畫面，讓卡片顯示答對率
-    } else { loadMatch(); }
-  }, 1800);
+  document.getElementById('match-next-btn').style.display = 'inline-flex';
+}
+
+function nextMatch() {
+  document.getElementById('match-next-btn').style.display = 'none';
+  G.mi++;
+  if (G.mi >= MATCH_ITEMS.length) {
+    G.lv1Match = G.mScore;
+    G.lv1Done  = true;
+    refreshLvStatus();
+    toast('關卡一全部完成！', 'ok');
+    showScreen('s-levels');  // 回選關卡畫面，讓卡片顯示答對率
+  } else { loadMatch(); }
 }
 
 // ──────────────────────────────────────────────
