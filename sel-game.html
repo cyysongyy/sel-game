@@ -820,19 +820,19 @@ function showResults() {
     <div class="brow">
       <span>🗓️ 關卡一：四年施作計畫（MCQ）</span>
       <span style="font-weight:700; color:${G.lv1MCQ/Q1.length>=.7?'var(--success)':'var(--gold)'}">
-        ${G.lv1MCQ} / ${Q1.length}
+        ${G.lv1MCQ} / ${Q1.length}（${pct(G.lv1MCQ,Q1.length)}%）
       </span>
     </div>
     <div class="brow">
       <span>🎯 關卡一：分類配對</span>
       <span style="font-weight:700; color:${G.lv1Match/MATCH_ITEMS.length>=.7?'var(--success)':'var(--gold)'}">
-        ${G.lv1Match} / ${MATCH_ITEMS.length}
+        ${G.lv1Match} / ${MATCH_ITEMS.length}（${pct(G.lv1Match,MATCH_ITEMS.length)}%）
       </span>
     </div>
     <div class="brow">
       <span>📅 關卡二：每週 SEL 行事曆</span>
       <span style="font-weight:700; color:${p2>=70?'var(--success)':'var(--gold)'}">
-        ${G.lv2MCQ} / ${Q2.length}
+        ${G.lv2MCQ} / ${Q2.length}（${p2}%）
       </span>
     </div>
     <div class="brow" style="border:none; padding-top:14px;">
