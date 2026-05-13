@@ -319,7 +319,7 @@
       <h3 style="font-size:1.1rem; margin-bottom:4px;">關卡一</h3>
       <h4 style="color:var(--teal-light); margin-bottom:8px;">四年施作計畫</h4>
       <p style="font-size:.85rem; color:var(--gray);">113–116 學年度<br>A 奠基 · B 實踐 · C 永續</p>
-      <span class="lv-tag" style="background:rgba(26,138,138,.28); color:var(--teal-light);">7 題 + 配對</span>
+      <span class="lv-tag" style="background:rgba(26,138,138,.28); color:var(--teal-light);">10 題</span>
       <div id="lv1-status" style="margin-top:10px; font-size:.85rem;"></div>
     </div>
     <div class="lv-card orange" onclick="startLevel(2)">
@@ -655,9 +655,9 @@ function startGame() {
 function refreshLvStatus() {
   const l1 = document.getElementById('lv1-status');
   const l2 = document.getElementById('lv2-status');
-  const total1 = Q1.length + MATCH_ITEMS.length;
+  const total1 = Q1.length;
   const total2 = Q2.length;
-  l1.innerHTML = G.lv1Done ? `<span style="color:var(--success)">✓ 完成：${pct(G.lv1MCQ + G.lv1Match, total1)}%</span>` : '';
+  l1.innerHTML = G.lv1Done ? `<span style="color:var(--success)">✓ 完成：${pct(G.lv1MCQ, total1)}%</span>` : '';
   l2.innerHTML = G.lv2Done ? `<span style="color:var(--success)">✓ 完成：${pct(G.lv2MCQ, total2)}%</span>` : '';
   document.getElementById('finish-btn').style.display = (G.lv1Done && G.lv2Done) ? 'inline-flex' : 'none';
 }
@@ -733,7 +733,16 @@ function nextQuestion() {
     const score = G.lvAnswers.filter(Boolean).length;
     if (G.lv === 1) {
       G.lv1MCQ = score;
-      startMatching();
+      G.lv1Match = 0;
+      G.lv1Done = true;
+      refreshLvStatus();
+      toast('關卡一完成！', 'ok');
+      // ── 關卡一個別計分 ──
+      if (WEBHOOK_URL) {
+        const l1s = pct(G.lv1MCQ, Q1.length);
+        new Image().src = WEBHOOK_URL + `?n=${encodeURIComponent(G.name)}&s=${encodeURIComponent(G.school)}&p=0&l1=${l1s}&l2=0&st=${encodeURIComponent('關卡一完成')}`;
+      }
+      showScreen('s-levels');
     } else {
       G.lv2MCQ = score;
       G.lv2Done = true;
@@ -816,12 +825,12 @@ function nextMatch() {
 //  RESULTS
 // ──────────────────────────────────────────────
 function showResults() {
-  const tot1 = Q1.length + MATCH_ITEMS.length;
+  const tot1 = Q1.length;
   const tot2 = Q2.length;
   const total = tot1 + tot2;
-  const correct = (G.lv1MCQ + G.lv1Match) + G.lv2MCQ;
+  const correct = G.lv1MCQ + G.lv2MCQ;
   const overall = pct(correct, total);
-  const p1 = pct(G.lv1MCQ + G.lv1Match, tot1);
+  const p1 = pct(G.lv1MCQ, tot1);
   const p2 = pct(G.lv2MCQ, tot2);
 
   document.getElementById('final-pct').textContent = overall + '%';
@@ -840,15 +849,9 @@ function showResults() {
   document.getElementById('breakdown').innerHTML = `
     <h3 style="margin-bottom:14px; font-size:1rem; font-weight:700;">成績明細</h3>
     <div class="brow">
-      <span>🗓️ 關卡一：四年施作計畫（MCQ）</span>
+      <span>🗓️ 關卡一：四年施作計畫</span>
       <span style="font-weight:700; color:${G.lv1MCQ/Q1.length>=.7?'var(--success)':'var(--gold)'}">
         ${G.lv1MCQ} / ${Q1.length}（${pct(G.lv1MCQ,Q1.length)}%）
-      </span>
-    </div>
-    <div class="brow">
-      <span>🎯 關卡一：分類配對</span>
-      <span style="font-weight:700; color:${G.lv1Match/MATCH_ITEMS.length>=.7?'var(--success)':'var(--gold)'}">
-        ${G.lv1Match} / ${MATCH_ITEMS.length}（${pct(G.lv1Match,MATCH_ITEMS.length)}%）
       </span>
     </div>
     <div class="brow">
